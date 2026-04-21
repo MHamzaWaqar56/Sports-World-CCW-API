@@ -1,31 +1,5 @@
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { hasCloudinaryConfig } from '../config/cloudinary.js';
-
-const uploadDir = path.resolve('uploads');
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const diskStorage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename(req, file, cb) {
-    const safeName = path
-      .basename(file.originalname, path.extname(file.originalname))
-      .replace(/[^a-zA-Z0-9-_]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .toLowerCase();
-
-    cb(null, `${safeName || 'product-image'}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
-
-const storage = hasCloudinaryConfig() ? multer.memoryStorage() : diskStorage;
+const storage = multer.memoryStorage();
 
 function checkFileType(file, cb) {
   const allowedMimeTypes = [
