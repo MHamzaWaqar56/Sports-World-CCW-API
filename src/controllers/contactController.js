@@ -53,16 +53,12 @@ export const getAllMessages = async (req, res) => {
   }
 };
 
-// 👁️ Mark as Read
-export const markAsRead = async (req, res) => {
+// ❌ Delete Message
+export const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const message = await Contact.findByIdAndUpdate(
-      id,
-      { isRead: true },
-      { new: true }
-    );
+    const message = await Contact.findByIdAndDelete(id);
 
     if (!message) {
       return res.status(404).json({
@@ -70,25 +66,6 @@ export const markAsRead = async (req, res) => {
         message: "Message not found",
       });
     }
-
-    res.status(200).json({
-      success: true,
-      data: message,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-};
-
-// ❌ Delete Message
-export const deleteMessage = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    await Contact.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,
