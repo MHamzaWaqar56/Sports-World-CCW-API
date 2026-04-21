@@ -25,23 +25,32 @@ const generateAutoBillNumber = async (billDate) => {
   const prefix = `BILL/${yearToken}/`;
   const prefixRegex = new RegExp(`^${escapeRegex(prefix)}\\d+$`, 'i');
 
-  const existingBills = await PurchaseBill.find({ billNumber: prefixRegex })
-    .select('billNumber -_id')
-    .lean();
+  const [sequenceStats] = await PurchaseBill.aggregate([
+    { $match: { billNumber: prefixRegex } },
+    {
+      $project: {
+        sequencePart: {
+          $arrayElemAt: [{ $split: ['$billNumber', '/'] }, 2],
+        },
+      },
+    },
+    {
+      $addFields: {
+        sequenceNumber: {
+          $convert: {
+            input: '$sequencePart',
+            to: 'int',
+            onError: null,
+            onNull: null,
+          },
+        },
+      },
+    },
+    { $match: { sequenceNumber: { $ne: null } } },
+    { $group: { _id: null, maxSequence: { $max: '$sequenceNumber' } } },
+  ]);
 
-  const maxSequence = existingBills.reduce((max, bill) => {
-    const value = String(bill.billNumber || '').trim();
-    const sequencePart = value.slice(prefix.length);
-    const sequenceNumber = Number(sequencePart);
-
-    if (!Number.isFinite(sequenceNumber)) {
-      return max;
-    }
-
-    return Math.max(max, sequenceNumber);
-  }, 0);
-
-  return formatAutoBillNumber(yearToken, maxSequence + 1);
+  return formatAutoBillNumber(yearToken, (sequenceStats?.maxSequence || 0) + 1);
 };
 
 const parseJsonArray = (value) => {
@@ -135,6 +144,13 @@ const resolveProductVariant = (product, item = {}) => {
   return product.variants.find((variant) => variant.isDefault) || product.variants[0];
 };
 
+const buildProductLookupMap = async (items = []) => {
+  const productIds = [...new Set(items.map((item) => item.productId))];
+  const products = await Product.find({ _id: { $in: productIds } });
+
+  return new Map(products.map((product) => [String(product._id), product]));
+};
+
 const recalculateProductStock = (product) => {
   if (!product) {
     return 0;
@@ -187,7 +203,6 @@ const applyVariantStockChange = async (productId, quantity, item = {}, direction
   }
 
   recalculateProductStock(product);
-  await product.save();
   return product;
 };
 
@@ -198,7 +213,7 @@ const normalizeItems = async (items = []) => {
     throw error;
   }
 
-  const normalizedItems = [];
+  const preparedItems = [];
 
   for (const row of items) {
     const productId = toTrimmedString(row.product);
@@ -218,7 +233,20 @@ const normalizeItems = async (items = []) => {
       throw error;
     }
 
-    const product = await Product.findById(productId);
+    preparedItems.push({
+      productId,
+      quantity,
+      costPrice,
+      sellingPrice,
+      row,
+    });
+  }
+
+  const productMap = await buildProductLookupMap(preparedItems);
+  const normalizedItems = [];
+
+  for (const item of preparedItems) {
+    const product = productMap.get(item.productId);
 
     if (!product) {
       const error = new Error('Selected product not found');
@@ -226,19 +254,19 @@ const normalizeItems = async (items = []) => {
       throw error;
     }
 
-    const variant = resolveProductVariant(product, row);
+    const variant = resolveProductVariant(product, item.row);
 
     normalizedItems.push({
       product: product._id,
       productName: product.name,
       variantId: variant?._id || null,
-      variantName: variant?.name || toTrimmedString(row.variantName),
-      variantSku: variant?.sku || toTrimmedString(row.variantSku),
-      variantAttributes: normalizeVariantAttributes(variant?.attributes || row.variantAttributes || []),
-      quantity,
-      costPrice,
-      sellingPrice,
-      lineTotal: quantity * costPrice,
+      variantName: variant?.name || toTrimmedString(item.row.variantName),
+      variantSku: variant?.sku || toTrimmedString(item.row.variantSku),
+      variantAttributes: normalizeVariantAttributes(variant?.attributes || item.row.variantAttributes || []),
+      quantity: item.quantity,
+      costPrice: item.costPrice,
+      sellingPrice: item.sellingPrice,
+      lineTotal: item.quantity * item.costPrice,
     });
   }
 

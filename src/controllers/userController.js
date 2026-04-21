@@ -3,7 +3,6 @@ import crypto from "crypto";
 import generateToken from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import sendToken from '../utils/sendToken.js';
-// import twilio from("twilio");
 import {
   canRegisterAsSeller,
   syncUserRoleWithWhitelist,

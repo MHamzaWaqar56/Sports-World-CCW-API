@@ -1,39 +1,3 @@
-// import express from 'express';
-// import {
-//   addOrderItems,
-//   getOrderById,
-//   updateOrderToPaid,
-//   updateOrderToDelivered,
-//   deleteOrder,
-//   getMyOrders,
-//   getOrders,
-//   cancelOrder,
-// } from '../controllers/orderController.js';
-// import { protect, seller } from '../middlewares/authMiddleware.js';
-// import { createPromo, validatePromo, getAllPromos, togglePromo, getPromoStats, deletePromo, deleteExpiredPromos, } from '../controllers/promoController.js';
-
-// const router = express.Router();
-
-// router.route('/').post(protect, addOrderItems).get(protect, seller, getOrders);
-// router.route('/myorders').get(protect, getMyOrders);
-// router.route('/:id').get(protect, getOrderById);
-// router.route('/:id').delete(protect, seller, deleteOrder);
-// router.route('/:id/pay').put(protect, updateOrderToPaid);
-// router.route('/:id/deliver').put(protect, seller, updateOrderToDelivered);
-// router.put('/:id/cancel', protect, cancelOrder);
-// router.post('/promo/validate', validatePromo);
-// router.post('/create-promo', protect, seller, createPromo);
-// router.get('/promos',  getAllPromos);
-// router.delete('/promos/expired', protect, seller, deleteExpiredPromos);
-// router.patch('/promo/:id/toggle', protect, seller, togglePromo);
-// router.get('/promo/:id/stats', protect, seller, getPromoStats);
-// router.delete('/promo/:id', protect, seller, deletePromo);
-
-// export default router;
-
-
-
-
 import express from 'express';
 import {
   addOrderItems,

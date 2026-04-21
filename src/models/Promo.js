@@ -1,30 +1,3 @@
-// import mongoose from 'mongoose';
-
-// const promoSchema = new mongoose.Schema({
-//   code: {
-//     type: String,
-//     required: true,
-//     unique: true,
-//     uppercase: true,
-//   },
-//   discountPercentage: {
-//     type: Number,
-//     required: true,
-//   },
-//   isActive: {
-//     type: Boolean,
-//     default: true,
-//   },
-//   expiryDate: Date,
-// });
-
-// const Promo = mongoose.model('Promo', promoSchema);
-// export default Promo;
-
-
-
-
-// models/Promo.js
 import mongoose from 'mongoose';
 
 const promoSchema = new mongoose.Schema(

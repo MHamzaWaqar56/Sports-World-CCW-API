@@ -21,12 +21,10 @@
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mongodb-memory-server": "^11.0.1",
     "mongoose": "^9.3.0",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.4",
-    "twilio": "^5.5.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
