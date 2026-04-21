@@ -38,13 +38,11 @@ const contactSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Admin panel ke liye useful fields
-    isRead: {
-      type: Boolean,
-      default: false,
-    },
+    
   },
   { timestamps: true }
 );
+
+contactSchema.index({ createdAt: 1 }, { expireAfterSeconds: 10 * 24 * 60 * 60 });
 
 export default mongoose.model("Contact", contactSchema);
