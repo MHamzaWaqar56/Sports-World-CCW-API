@@ -80,19 +80,7 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    removeUnverifiedAccounts();
-    expireNewArrivals();
+const PORT = process.env.PORT;
 
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  } catch (error) {
-    console.error('Failed to start server', error);
-    process.exit(1);
-  }
-};
-
-startServer();
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
