@@ -73,10 +73,6 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/bat-repairs', batRepairRoutes);
 app.use('/api/expenses', expenseRoutes);
 
-
-const __dirname = path.resolve();
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
-
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
