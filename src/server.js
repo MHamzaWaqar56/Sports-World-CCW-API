@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import mongoose from 'mongoose';
 import connectDB from './config/db.js';
+import Product from './models/Product.js';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 import contactRoutes from './routes/contactRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -71,6 +72,64 @@ app.use(cookieParser());
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get('/api/products/featured', ensureDatabaseConnection, async (req, res, next) => {
+  try {
+    const products = await Product.find({ isFeatured: true }).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/products/top-reviews', ensureDatabaseConnection, async (req, res, next) => {
+  try {
+    const limit = Number(req.query.limit) || 5;
+    const products = await Product.find(
+      { 'reviews.rating': 5 },
+      { name: 1, reviews: 1, images: 1, image: 1 }
+    );
+
+    const allFiveStarReviews = [];
+
+    for (const product of products) {
+      for (const review of product.reviews) {
+        if (review.rating === 5) {
+          allFiveStarReviews.push({
+            _id: review._id,
+            name: review.name,
+            rating: review.rating,
+            comment: review.comment,
+            createdAt: review.createdAt,
+            productName: product.name,
+            productImage: product.images?.[0] || product.image || null,
+          });
+        }
+      }
+    }
+
+    allFiveStarReviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json(allFiveStarReviews.slice(0, limit));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/products/:id/reviews', ensureDatabaseConnection, async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      res.status(404);
+      throw new Error('Product not found');
+    }
+
+    res.json({ reviews: product.reviews || [] });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.use('/api/users', ensureDatabaseConnection, userRoutes);
