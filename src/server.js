@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 import contactRoutes from './routes/contactRoutes.js';
@@ -22,6 +23,22 @@ import expireNewArrivals from './automation/ExpireNewArrivals.js';
 dotenv.config();
 
 const app = express();
+const isVercel = Boolean(process.env.VERCEL);
+let dbConnectionPromise = null;
+
+const ensureDatabaseConnection = async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      dbConnectionPromise ??= connectDB();
+      await dbConnectionPromise;
+    }
+
+    next();
+  } catch (error) {
+    dbConnectionPromise = null;
+    next(error);
+  }
+};
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -56,18 +73,18 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/admin-inventory', adminInventoryRoutes);
-app.use('/api/admin', adminInventoryRoutes);
-app.use('/api/admin-reports', adminReportRoutes);
-app.use('/api/admin', adminReportRoutes);
-app.use('/api/wishlist', wishListRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/bat-repairs', batRepairRoutes);
-app.use('/api/expenses', expenseRoutes);
+app.use('/api/users', ensureDatabaseConnection, userRoutes);
+app.use('/api/products', ensureDatabaseConnection, productRoutes);
+app.use('/api/orders', ensureDatabaseConnection, orderRoutes);
+app.use('/api/admin-inventory', ensureDatabaseConnection, adminInventoryRoutes);
+app.use('/api/admin', ensureDatabaseConnection, adminInventoryRoutes);
+app.use('/api/admin-reports', ensureDatabaseConnection, adminReportRoutes);
+app.use('/api/admin', ensureDatabaseConnection, adminReportRoutes);
+app.use('/api/wishlist', ensureDatabaseConnection, wishListRoutes);
+app.use('/api/cart', ensureDatabaseConnection, cartRoutes);
+app.use('/api/contact', ensureDatabaseConnection, contactRoutes);
+app.use('/api/bat-repairs', ensureDatabaseConnection, batRepairRoutes);
+app.use('/api/expenses', ensureDatabaseConnection, expenseRoutes);
 
 
 const __dirname = path.resolve();
@@ -80,6 +97,12 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+if (!isVercel) {
+  removeUnverifiedAccounts();
+  expireNewArrivals();
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+export default app;
