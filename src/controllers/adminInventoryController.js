@@ -3,7 +3,7 @@ import XLSX from 'xlsx';
 import Product from '../models/Product.js';
 import OfflineSale from '../models/OfflineSale.js';
 
-const DEFAULT_PRODUCT_IMAGE = '/uploads/product-placeholder.png';
+const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/da8lxpc3h/image/upload/v1776739759/bat-collection_hq8qgl.avif';
 const DEFAULT_PRODUCT_BRAND = 'Sports World';
 const OFFLINE_PAYMENT_MODES = ['Cash', 'Online', 'Pending'];
 const PRODUCT_NAME_ALIASES = {

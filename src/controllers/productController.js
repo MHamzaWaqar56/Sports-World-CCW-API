@@ -3,7 +3,7 @@ import Order from '../models/Order.js';
 import { hasCloudinaryConfig } from '../config/cloudinary.js';
 import { uploadBufferToCloudinary } from '../utils/uploadToCloudinary.js';
 
-const DEFAULT_PRODUCT_IMAGE = '/uploads/product-placeholder.png';
+const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/da8lxpc3h/image/upload/v1776739759/bat-collection_hq8qgl.avif';
 const CATEGORY_DETAIL_TEMPLATES = {
   Bat: {
     description: (name) =>

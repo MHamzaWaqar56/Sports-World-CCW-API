@@ -1,7 +1,7 @@
 import Product from '../models/Product.js';
 import PurchaseBill from '../models/PurchaseBill.js';
 
-const DEFAULT_PRODUCT_IMAGE = '/uploads/product-placeholder.png';
+const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/da8lxpc3h/image/upload/v1776739759/bat-collection_hq8qgl.avif';
 const CATEGORY_OPTIONS = ['Bat', "Foot Wear", "Hockey", "Bag", "Award", "Football" ,'Ball', "Bottom Wear", 'Gloves', 'Accessories', 'Sleeves', 'Shaker', 'Other'];
 const PAYMENT_MODES = new Set(['cash', 'online', 'upi', 'partial', 'pending']);
 const PAYMENT_STATUSES = new Set(['pending', 'paid', 'partial']);
