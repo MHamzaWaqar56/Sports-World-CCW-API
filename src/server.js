@@ -23,11 +23,6 @@ dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
-removeUnverifiedAccounts();
-expireNewArrivals();
-
 const allowedOrigins = [
   process.env.CLIENT_URL,
   process.env.FRONTEND_URL,
@@ -87,4 +82,17 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const startServer = async () => {
+  try {
+    await connectDB();
+    removeUnverifiedAccounts();
+    expireNewArrivals();
+
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error('Failed to start server', error);
+    process.exit(1);
+  }
+};
+
+startServer();
