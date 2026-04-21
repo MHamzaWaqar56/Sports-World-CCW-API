@@ -80,7 +80,11 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
+const isVercel = Boolean(process.env.VERCEL);
+const PORT = process.env.PORT || 5000;
 
-const PORT = process.env.PORT;
+if (!isVercel) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+export default app;
